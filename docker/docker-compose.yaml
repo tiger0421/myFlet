@@ -1,0 +1,15 @@
+version: "3"
+services:
+  flet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flet
+    container_name: flet
+    restart: always
+    ports:
+      - 8550:8550
+    working_dir: /root/ws
+    tty: true
+    volumes:
+      - ../:/root/ws:rw
