@@ -3,97 +3,155 @@ from flet.matplotlib_chart import MatplotlibChart
 import myFunc
 import matplotlib
 import matplotlib.pyplot as plt
+import japanize_matplotlib
+import random
 
 
-slog_file_dir = "./test.slog"
-title = "graph title"
-element_name_list = dict()
-Date_columns_name = "Date"
+DATE_COLUMNS_NAME = "Date"
+
+
+class GraphProcessing(ft.UserControl):
+    def __init__(self, page):
+        super().__init__()
+        self.expand = True
+        self.columns_name = ""
+        self.page = page
+
+
+    def build(self):
+        # Right View(graph only)
+        ## Drow graph
+        self.plt_fig, self.ax = plt.subplots()
+        self.ft_plt_fig = MatplotlibChart(self.plt_fig, isolated=True, expand=True)
+
+        ## File picker
+        self.pick_files_dialog = ft.FilePicker(on_result=self.pick_files_result)
+        self.page.overlay.append(self.pick_files_dialog)
+        ft_file_picker = ft.ElevatedButton(
+            "Pick files",
+            icon=ft.icons.UPLOAD_FILE,
+            on_click=lambda _: self.pick_files_dialog.pick_files(
+                allow_multiple=False
+            ),
+        )
+
+        ## Drow graph button
+        ft_drow_button = ft.ElevatedButton(
+            "Update Figure!",
+            icon="auto_graph",
+            icon_color="green400",
+            on_click = self.refresh_graph,
+        )
+
+        ## concatenate left view elements
+        self.right_buttons = ft.Row(
+                                controls = [
+                                            ft_file_picker,
+                                            ft_drow_button,
+                                            ],
+                                alignment = ft.MainAxisAlignment.SPACE_AROUND,
+                            )
+        self.left_view = ft.Column(
+                            controls = [
+                                        self.right_buttons,
+                                        self.ft_plt_fig,
+                                        ],
+                            alignment = ft.MainAxisAlignment.CENTER,
+                            )
+
+        # Right View
+        self.columns_name = [str(i) for i in range(100)]
+        self.lv = self.make_lv(self.columns_name)
+        self.right_view = ft.Column(
+                            controls = [
+                                        ft.Text(value = "Choose index which you want to graph"),
+                                        self.lv,
+                                        ]
+                        )
+
+        # Concatenate View
+        self.view = ft.Row(
+            controls = [
+                self.left_view,
+                self.right_view,
+            ]
+        )
+
+
+        # application's root control (i.e. "view") containing all other controls
+        return self.view
+
+
+    def pick_files_result(self, e: ft.FilePickerResultEvent):
+        slog_file_dir = (
+            ", ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
+        )
+        try:
+            self.slog = myFunc.read_slog(slog_file_dir)
+            self.slog = myFunc.preprocess_slog_date(self.slog, DATE_COLUMNS_NAME)
+            self.columns_name = self.slog.drop(DATE_COLUMNS_NAME, axis=1).columns.values
+            self.update_cb()
+            self.ax.clear()
+        except Exception as e:
+            print(e)
+
+
+    def update_cb(self):
+        self.right_view.controls.remove(self.lv)
+        self.lv = self.make_lv(self.columns_name)
+        self.right_view.controls.append(self.lv)
+        self.update()
+
+
+    def make_lv(self, columns_name):
+        items = []
+        if(len(columns_name)):
+            items = [
+                        ft.Checkbox(label = name, value = False) for name in columns_name
+                    ]
+        return ft.ListView(
+                    expand = 1,
+                    spacing = 10,
+                    padding = 20,
+                    controls = items,
+                )
+
+
+    def refresh_graph(self, e):
+        try:
+            self.ax.clear()
+            plot_list = self.get_plot_list()
+            self.ax.plot(self.slog[DATE_COLUMNS_NAME], self.slog[plot_list], label = plot_list)
+            self.ax.legend()
+            self.ft_plt_fig.update()
+        except Exception as err:
+            print(err)
+
+
+    def get_plot_list(self):
+        plot_list = []
+        for ft_cb in self.lv.controls:
+            if(ft_cb.value == True):
+                plot_list.append(ft_cb.label)
+        return plot_list
 
 
 def main(page: ft.Page):
-    def update_element_name_list():
-        global element_name_list
-        element_name_list = []
-        for ft_cb in cb_list:
-            if(ft_cb.content.value):
-                element_name_list.append(ft_cb.content.label)
+    page.title = "Graph plot"
+    page.horizontal_alignment = "center"
+    page.update()
 
-    def refresh_graph(e):
-        update_element_name_list()
-        if(len(element_name_list)):
-            ax.clear()
-            ax.plot(slog[Date_columns_name], slog[element_name_list])
-            plt_fig = myFunc.make_graph(data = slog,
-                            element_name_list = element_name_list,
-                            Date_columns_name = Date_columns_name,
-                            title = title)
-            ft_plt_fig.update()
-            page.update()
+    # create application instance
+    app = GraphProcessing(page)
 
-
-    def make_cb(columns_name):
-        items = []
-        for name in columns_name:
-            items.append(
-                ft.Container(
-                    content=ft.Checkbox(label = name),
-                    alignment=ft.alignment.center,
-                )
-            )
-        return items
-
-
-    # Read slog file and preprocess data
-    slog = myFunc.read_slog(slog_file_dir)
-    slog = myFunc.preprocess_slog_date(slog, Date_columns_name)
-
-    columns_name = slog.drop(Date_columns_name, axis=1).columns.values
-
-    # Left View
-    drow_button = ft.ElevatedButton(
-        "Update Figure!",
-        icon="auto_graph",
-        icon_color="green400",
-        on_click = refresh_graph,
-    )
-
-    cb_list = make_cb(columns_name)
-    cb = ft.Column(
-            wrap = True,
-            controls = cb_list,
-        )
-
-    left_columns = ft.Column(
-            controls = [
-                drow_button,
-                cb,
-            ],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-    )
-
-    # Right View(graph only)
-    # Drow graph
-    global element_name_list
-    plt_fig, ax = myFunc.make_graph(
-                        data = slog,
-                        element_name_list = element_name_list,
-                        Date_columns_name = Date_columns_name,
-                        title = title
-                    )
-    ft_plt_fig = MatplotlibChart(plt_fig, isolated=True, expand=True)
-
-    # Concatenate View
-    row = ft.Row(
-        controls = [
-            ft.Container(expand = 1, content = left_columns),
-            ft.Container(expand = 1, content = ft_plt_fig),
-        ]
-    )
-
-    page.add(row)
+    # add application's root control to the page
+    page.add(app)
+#    page.overlay.append(app.pick_files_dialog)
 
 
 # Execute app
 ft.app(target=main, view=ft.WEB_BROWSER, port=8550)
+
+
+
 

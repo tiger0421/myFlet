@@ -1,5 +1,4 @@
 import pandas as pd
-#import japanize_matplotlib
 import matplotlib
 import matplotlib.pyplot as plt
 from datetime import timedelta

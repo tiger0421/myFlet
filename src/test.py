@@ -1,49 +1,73 @@
 import flet as ft
-import time
+
+
+class GraphProcessing(ft.UserControl):
+    def __init__(self, page):
+        super().__init__()
+        self.expand = True
+        self.columns_name = ""
+        self.page = page
+
+
+    def build(self):
+        self.columns_name = [str(i) for i in range(100)]
+        self.lv = ft.ListView(expand = 1, spacing = 10, padding = 20)
+        self.lv.controls.append(ft.Checkbox(label = "a"))
+        self.lv = self.make_cb(self.columns_name)
+        column = ft.Row(
+                controls = [
+                        ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.add_clicked),
+                        self.lv
+#                        ft.Container(expand = 1, content = self.lv)
+                        ],
+                )
+        return column
+
+    def make_cb(self, columns_name):
+        items = []
+        if(len(columns_name)):
+            items = [
+                        ft.Checkbox(label = name, value = False) for name in columns_name
+                    ]
+        return ft.ListView(
+                    expand = 1,
+                    spacing = 10,
+                    padding = 20,
+                    controls = items,
+                )
+
+    def add_clicked(self, e):
+        self.lv.controls.append(ft.Text(value = "A"))
+        self.page.update()
+
+
 
 
 def main(page: ft.Page):
-    def update_txt(e):
-        t.value = str(e.control.selected_index)
+    def items(count):
+        items = []
+        for i in range(1, count + 1):
+            items.append(
+                ft.Container(
+                    content=ft.Text(value=str(i)),
+                    alignment=ft.alignment.center,
+                    width=50,
+                    height=50,
+                    bgcolor=ft.colors.AMBER,
+                    border_radius=ft.border_radius.all(5),
+                )
+            )
+        return items
 
-    t = ft.Text(value = "Body!", color = "green")
-    rail = ft.NavigationRail(
-        selected_index=0,
-        label_type=ft.NavigationRailLabelType.ALL,
-        # extended=True,
-        min_width=100,
-        min_extended_width=400,
-        leading=ft.FloatingActionButton(icon=ft.icons.CREATE, text="Add"),
-        group_alignment=-0.9,
-        destinations=[
-            ft.NavigationRailDestination(
-                icon_content=ft.Icon(ft.icons.FAVORITE_BORDER),
-                selected_icon_content=ft.Icon(ft.icons.FAVORITE),
-                label="First",
-            ),
-            ft.NavigationRailDestination(
-                icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
-                label="Second",
-            ),
-            ft.NavigationRailDestination(
-                icon=ft.icons.SETTINGS_OUTLINED,
-                selected_icon_content=ft.Icon(ft.icons.SETTINGS),
-                label_content=ft.Text("Settings"),
-            ),
-        ],
-        on_change=update_txt,
-    )
+    gp = GraphProcessing(page)
+    t = ft.Text(value = "A")
+    view = ft.Row(controls=[
+                        gp,
+#                        ft.Container(expand =1 , content=gp),
+#                        ft.Container(expand =1, content=t),
+                        ]
+                  )
 
-    page.add(
-        ft.Row(
-            [
-                rail,
-                ft.VerticalDivider(width=1),
-                ft.Column([ t ], alignment=ft.MainAxisAlignment.START, expand=True),
-            ],
-            expand=True,
-        )
-    )
+    page.add(gp)
 
 ft.app(target=main, view=ft.WEB_BROWSER, port=8550)
