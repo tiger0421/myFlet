@@ -90,13 +90,13 @@ class GraphProcessing(ft.UserControl):
             self.slog = myFunc.read_slog(slog_file_dir)
             self.slog = myFunc.preprocess_slog_date(self.slog, DATE_COLUMNS_NAME)
             self.columns_name = self.slog.drop(DATE_COLUMNS_NAME, axis=1).columns.values
-            self.update_cb()
+            self.update_lv()
             self.ax.clear()
         except Exception as e:
             print(e)
 
 
-    def update_cb(self):
+    def update_lv(self):
         self.right_view.controls.remove(self.lv)
         self.lv = self.make_lv(self.columns_name)
         self.right_view.controls.append(self.lv)
@@ -123,6 +123,10 @@ class GraphProcessing(ft.UserControl):
             plot_list = self.get_plot_list()
             self.ax.plot(self.slog[DATE_COLUMNS_NAME], self.slog[plot_list], label = plot_list)
             self.ax.legend()
+            self.ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%H:%M:%S"))
+#            labels = self.ax.get_xticklabels()
+#            self.ax.setp(labels, rotation=45, fontsize=10);
+            self.ax.xaxis.set_tick_params(rotation=45)
             self.ft_plt_fig.update()
         except Exception as err:
             print(err)

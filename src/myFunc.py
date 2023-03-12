@@ -1,6 +1,4 @@
 import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
 from datetime import timedelta
 
 def read_slog(file_dir):
@@ -8,24 +6,29 @@ def read_slog(file_dir):
     return pd.read_csv(file_dir, sep='\t', lineterminator='\n')
 
 
-def preprocess_slog_date(slog, Date_columns_name):
-    slog[Date_columns_name] = pd.to_datetime(
-            slog[Date_columns_name],
+def preprocess_slog_date(slog, DATE_COLUMNS_NAME):
+    slog[DATE_COLUMNS_NAME] = pd.to_datetime(
+            slog[DATE_COLUMNS_NAME],
             format="%Y/%m/%d　%H:%M:%S"
         )
-    slog[Date_columns_name] -= slog[Date_columns_name][0]
+    slog[DATE_COLUMNS_NAME] -= slog[DATE_COLUMNS_NAME][0]
+    slog[DATE_COLUMNS_NAME] = my_hhmmss(slog[DATE_COLUMNS_NAME].dt)
+
     return slog
 
 
-def make_graph(data, element_name_list, Date_columns_name, title=None):
-    fig, ax = plt.subplots()
-    if(len(data) and len(element_name_list) and len(Date_columns_name)):
-        x = data[Date_columns_name]
-        for element in element_name_list:
-            ax.plot(x, data[element], label = element)
-            ax.legend()
-        if(title):
-            ax.set_title(title)
-    return fig, ax
+def my_hhmmss(td):
+    ss = td.total_seconds().astype(int)
+    mm, ss = ss.divmod(60, fill_value = 0)
+    hh, mm = mm.divmod(60, fill_value = 0)
 
+    # Change format from float to str
+    hh = hh.map('{:03.0f}'.format).astype(str)
+    mm = mm.map('{:02.0f}'.format).astype(str)
+    ss = ss.map('{:02.0f}'.format).astype(str)
+
+
+    # Concatenate
+    r = hh + ":" + mm + ":" + ss
+    return r
 
