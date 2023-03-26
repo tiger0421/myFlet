@@ -122,11 +122,10 @@ class GraphProcessing(ft.UserControl):
             self.ax.clear()
             plot_list = self.get_plot_list()
             self.ax.plot(self.slog[DATE_COLUMNS_NAME], self.slog[plot_list], label = plot_list)
+            self.ax.xaxis.set_tick_params(rotation=45, labelsize=5)
+            step = (60 // 30) * 30
+            self.ax.set_xticks(self.slog[DATE_COLUMNS_NAME][::step])
             self.ax.legend()
-            self.ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%H:%M:%S"))
-#            labels = self.ax.get_xticklabels()
-#            self.ax.setp(labels, rotation=45, fontsize=10);
-            self.ax.xaxis.set_tick_params(rotation=45)
             self.ft_plt_fig.update()
         except Exception as err:
             print(err)
@@ -145,12 +144,11 @@ def main(page: ft.Page):
     page.horizontal_alignment = "center"
     page.update()
 
-    # create application instance
+    # Create application instance
     app = GraphProcessing(page)
 
-    # add application's root control to the page
+    # Add application's root control to the page
     page.add(app)
-#    page.overlay.append(app.pick_files_dialog)
 
 
 # Execute app
