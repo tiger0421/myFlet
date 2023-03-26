@@ -43,11 +43,21 @@ class GraphProcessing(ft.UserControl):
             on_click = self.refresh_graph,
         )
 
+        ## Save graph as an image
+        ft_save_image = ft.ElevatedButton(
+            "Save Figure!",
+            icon="image",
+            icon_color="ft.colors.BLUE",
+            on_click = self.save_graph,
+        )
+
+
         ## concatenate left view elements
         self.right_buttons = ft.Row(
                                 controls = [
                                             ft_file_picker,
                                             ft_drow_button,
+                                            ft_save_image,
                                             ],
                                 alignment = ft.MainAxisAlignment.SPACE_AROUND,
                             )
@@ -60,7 +70,7 @@ class GraphProcessing(ft.UserControl):
                             )
 
         # Right View
-        self.columns_name = [str(i) for i in range(100)]
+        self.columns_name = [str(i) for i in range(10)]
         self.lv = self.make_lv(self.columns_name)
         self.right_view = ft.Column(
                             controls = [
@@ -137,6 +147,10 @@ class GraphProcessing(ft.UserControl):
             if(ft_cb.value == True):
                 plot_list.append(ft_cb.label)
         return plot_list
+
+
+    def save_graph(self, e):
+        self.plt_fig.savefig("./result.png")
 
 
 def main(page: ft.Page):
