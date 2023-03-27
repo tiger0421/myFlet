@@ -7,12 +7,24 @@ def read_slog(file_dir):
 
 
 def preprocess_slog_date(slog, DATE_COLUMNS_NAME):
+    # Date
     slog[DATE_COLUMNS_NAME] = pd.to_datetime(
             slog[DATE_COLUMNS_NAME],
             format="%Y/%m/%d　%H:%M:%S"
         )
     slog[DATE_COLUMNS_NAME] -= slog[DATE_COLUMNS_NAME][0]
     slog[DATE_COLUMNS_NAME] = my_hhmmss(slog[DATE_COLUMNS_NAME].dt)
+
+    # String Data
+    slog = slog.replace("OFF", 0)
+    slog = slog.replace("ON", 1)
+
+    # % -> numeric
+    slog = slog.apply(pd.to_numeric, errors='ignore').astype("str")
+    slog = slog.apply(lambda x: x.str.rstrip('%').astype('float') / 100
+              if x.dtype == 'object' and x.str.endswith('%').any()
+              else x)
+
 
     return slog
 
