@@ -22,6 +22,7 @@ class GraphProcessing(ft.UserControl):
         # Right View(graph only)
         ## Drow graph
         self.plt_fig, self.ax = plt.subplots()
+        self.ax2 = self.ax.twinx()
         self.ft_plt_fig = MatplotlibChart(self.plt_fig, isolated=True, expand=True)
 
         ## File picker
@@ -98,7 +99,7 @@ class GraphProcessing(ft.UserControl):
         )
         try:
             self.slog = myFunc.read_slog(slog_file_dir)
-            self.slog = myFunc.preprocess_slog_date(self.slog, DATE_COLUMNS_NAME)
+            self.slog = myFunc.preprocess_slog(self.slog, DATE_COLUMNS_NAME)
             self.columns_name = self.slog.drop(DATE_COLUMNS_NAME, axis=1).columns.values
             self.update_lv()
             self.ax.clear()

@@ -6,7 +6,7 @@ def read_slog(file_dir):
     return pd.read_csv(file_dir, sep='\t', lineterminator='\n')
 
 
-def preprocess_slog_date(slog, DATE_COLUMNS_NAME):
+def preprocess_slog(slog, DATE_COLUMNS_NAME):
     # Date
     slog[DATE_COLUMNS_NAME] = pd.to_datetime(
             slog[DATE_COLUMNS_NAME],
@@ -16,8 +16,7 @@ def preprocess_slog_date(slog, DATE_COLUMNS_NAME):
     slog[DATE_COLUMNS_NAME] = my_hhmmss(slog[DATE_COLUMNS_NAME].dt)
 
     # String Data
-    slog = slog.replace("OFF", 0)
-    slog = slog.replace("ON", 1)
+    slog = slog.replace({"OFF" : 0, "ON" : 1})
 
     # % -> numeric
     slog = slog.apply(pd.to_numeric, errors='ignore').astype("str")
