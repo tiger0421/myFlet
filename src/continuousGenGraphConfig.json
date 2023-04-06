@@ -1,0 +1,14 @@
+graph1:
+  -
+    ax1:
+      - R-Thあ
+      - hyaku
+
+graph2:
+  -
+    ax1:
+      - R-Thあ
+      - Def2
+    ax2:
+      - ON_OFF
+      - hyaku
