@@ -13,6 +13,7 @@ RUN apt update && \
         japanize_matplotlib \
         numpy \
         pandas \
+        pyyaml \
     && \
     apt --purge remove -y build-essential && \
     apt clean  && \
