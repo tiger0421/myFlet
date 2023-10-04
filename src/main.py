@@ -100,6 +100,7 @@ class GraphProcessing(ft.UserControl):
         try:
             self.slog = myFunc.read_slog(slog_file_dir)
             self.slog = myFunc.preprocess_slog(self.slog, DATE_COLUMNS_NAME)
+            self.slog.to_excel(slog_file_dir+'.xlsx', sheet_name='Sheet1')
             self.columns_name = self.slog.drop(DATE_COLUMNS_NAME, axis=1).columns.values
             self.update_lv()
             self.ax.clear()

@@ -1,4 +1,4 @@
-FROM python:3.8.16-slim
+FROM python:3.12.0-slim
 
 RUN apt update && \
     apt upgrade -y && \
@@ -14,6 +14,7 @@ RUN apt update && \
         numpy \
         pandas \
         pyyaml \
+        xlwt \
     && \
     apt --purge remove -y build-essential && \
     apt clean  && \
